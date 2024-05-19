@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test";
 
 const moment = require("moment");
 
-let now = moment().format("L");
+let now = moment().format("DD/MM/YYYY");
 
-test("open excel sheet and add today date", async ({ page }) => {
+test("open excel sheet and add today date", async ({ page, context }) => {
   test.setTimeout(50000);
 
   await page.goto(
@@ -21,49 +21,115 @@ test("open excel sheet and add today date", async ({ page }) => {
       .getByRole("button", { name: "this is new test Saved to" })
   ).toBeVisible();
 
-  await page
-    .frameLocator('iframe[name="WacFrame_Excel_0"]')
-    .locator('//input[@id="FormulaBar-NameBox-input"]')
-    .clear();
+  await page.waitForTimeout(20000);
 
   await page
     .frameLocator('iframe[name="WacFrame_Excel_0"]')
     .locator('//input[@id="FormulaBar-NameBox-input"]')
-    .fill("B4");
-
-  await page
-    .frameLocator('iframe[name="WacFrame_Excel_0"]')
-    .locator('//input[@id="FormulaBar-NameBox-input"]')
-    .press("Enter");
-
-  await page
-    .frameLocator('iframe[name="WacFrame_Excel_0"]')
-    .locator('//div[@id="formulaBarTextDivId_textElement"]')
-    .fill("=TODAY()");
-
-  await page
-    .frameLocator('iframe[name="WacFrame_Excel_0"]')
-    .locator('//div[@id="formulaBarTextDivId_textElement"]')
-    .press("Enter");
+    .click();
 
   await page
     .frameLocator('iframe[name="WacFrame_Excel_0"]')
     .locator('//input[@id="FormulaBar-NameBox-input"]')
     .clear();
 
+  await page.waitForTimeout(2000);
+
   await page
     .frameLocator('iframe[name="WacFrame_Excel_0"]')
     .locator('//input[@id="FormulaBar-NameBox-input"]')
     .fill("B4");
 
+  await page.waitForTimeout(200);
+
   await page
     .frameLocator('iframe[name="WacFrame_Excel_0"]')
     .locator('//input[@id="FormulaBar-NameBox-input"]')
     .press("Enter");
+
+  await page.waitForTimeout(2000);
+
+  await page
+    .frameLocator('iframe[name="WacFrame_Excel_0"]')
+    .locator('//div[@id="formulaBarTextDivId_textElement"]')
+    .click();
+
+  await page.waitForTimeout(2000);
+
+  await page
+    .frameLocator('iframe[name="WacFrame_Excel_0"]')
+    .locator('//div[@id="formulaBarTextDivId_textElement"]')
+    .pressSequentially("=TODAY()", { delay: 100 });
+
+  await page
+    .frameLocator('iframe[name="WacFrame_Excel_0"]')
+    .locator('//div[@id="formulaBarTextDivId_textElement"]')
+    .press("Enter");
+
+  await page.waitForTimeout(2000);
+
+  const myElement = page
+    .frameLocator('iframe[name="WacFrame_Excel_0"]')
+    .getByLabel("Got it");
+
+  if (await myElement.isVisible()) {
+    await myElement.click();
+
+    await page.waitForTimeout(2000);
+
+    await page
+      .frameLocator('iframe[name="WacFrame_Excel_0"]')
+      .locator('//div[@id="formulaBarTextDivId_textElement"]')
+      .click();
+
+    await page.waitForTimeout(200);
+  }
+
+  await page
+    .frameLocator('iframe[name="WacFrame_Excel_0"]')
+    .locator('//input[@id="FormulaBar-NameBox-input"]')
+    .click();
+
+  await page
+    .frameLocator('iframe[name="WacFrame_Excel_0"]')
+    .locator('//input[@id="FormulaBar-NameBox-input"]')
+    .clear();
+
+  await page.waitForTimeout(2000);
+
+  await page
+    .frameLocator('iframe[name="WacFrame_Excel_0"]')
+    .locator('//input[@id="FormulaBar-NameBox-input"]')
+    .fill("B4");
+
+  await page.waitForTimeout(200);
+
+  await page
+    .frameLocator('iframe[name="WacFrame_Excel_0"]')
+    .locator('//input[@id="FormulaBar-NameBox-input"]')
+    .press("Enter");
+
+  await page.waitForTimeout(2000);
 
   await expect(
     page
       .frameLocator('iframe[name="WacFrame_Excel_0"]')
-      .locator('//div[@id="m_excelWebRenderer_ewaCtl_selectionHighlight0-1-0"]')
-  ).toHaveText(now);
+      .locator('//div[@id="formulaBarTextDivId_textElement"]//div')
+  ).toHaveText("=TODAY()");
+
+  await expect(
+    page
+      .frameLocator('iframe[name="WacFrame_Excel_0"]')
+      .locator(
+        '(//label[@aria-label="' + now + ' . B4 . Contains Formula . "])[1]'
+      )
+  ).toBeHidden();
+
+  await expect(
+    page
+      .frameLocator('iframe[name="WacFrame_Excel_0"]')
+      .locator(
+        '(//label[@aria-label="' + now + ' . B4 . Contains Formula . "])[2]'
+      )
+  ).toHaveAttribute("aria-label", now + " . B4 . Contains Formula . ");
 });
